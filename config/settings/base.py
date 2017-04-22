@@ -275,4 +275,4 @@ ADMIN_URL = r'^admin/'
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
 
-GOOGLE_API_KEY = env('GoogleAPI')
+GOOGLE_API_KEY = env('GOOGLE_API_KEY')
