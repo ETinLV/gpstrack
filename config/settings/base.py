@@ -59,8 +59,8 @@ LOCAL_APPS = [
     # custom users app
     'gpstrack.users.apps.UsersConfig',
     # Your stuff: custom apps go here
+    'gpstrack.tracks',
 ]
-
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -274,3 +274,5 @@ ADMIN_URL = r'^admin/'
 
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+
+GOOGLE_API_KEY = env('GoogleAPI')

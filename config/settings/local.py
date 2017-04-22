@@ -68,4 +68,6 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Your local stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+HEROKU_APP_NAME = 'etgpstrack'

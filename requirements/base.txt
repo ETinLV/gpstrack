@@ -10,8 +10,6 @@ django==1.10.7 # pyup: >=1.10,<1.11
 # Configuration
 django-environ==0.4.1
 
-
-
 # Forms
 django-braces==1.11.0
 django-crispy-forms==1.6.1
@@ -43,8 +41,9 @@ pytz==2017.2
 django-redis==4.7.0
 redis>=2.10.5
 
-
-
-
-
 # Your custom requirements go here
+#XML converter
+xmltodict==0.10.2
+
+#Django REST Framework
+djangorestframework == 3.6.2
