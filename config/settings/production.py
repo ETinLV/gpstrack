@@ -10,10 +10,6 @@ Production Configurations
 """
 from __future__ import absolute_import, unicode_literals
 
-from boto.s3.connection import OrdinaryCallingFormat
-from django.utils import six
-
-
 from .base import *  # noqa
 
 # SECRET CONFIGURATION
@@ -69,6 +65,11 @@ INSTALLED_APPS += ['gunicorn', ]
 # # 'django.contrib.staticfiles'
 # AWS_PRELOAD_METADATA = True
 # INSTALLED_APPS = ['collectfast', ] + INSTALLED_APPS
+
+
+# Gzip Static Files
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
 
 # EMAIL
 # ------------------------------------------------------------------------------

@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     'allauth',  # registration
     'allauth.account',  # registration
     'allauth.socialaccount',  # registration
+    'rest_framework', # API
 ]
 
 # Apps specific for this project go here.
@@ -275,4 +276,4 @@ ADMIN_URL = r'^admin/'
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
 
-GOOGLE_API_KEY = env('GOOGLE_API_KEY')
+GOOGLE_API_KEY = env.get_value('GOOGLE_API_KEY', default='')
