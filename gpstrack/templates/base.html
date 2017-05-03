@@ -101,6 +101,7 @@
 <!-- place project specific Javascript in this file -->
 <script type="text/javascript">
     var baseURL = "{% url 'tracks:home' %} ";
+    var static_url = "{{ STATIC_URL }}";
     var tracksListURL = "{% url 'tracks:api.track_list' %}";
     var pointsListURL = "{% url 'tracks:api.point_list' %}";
 </script>
