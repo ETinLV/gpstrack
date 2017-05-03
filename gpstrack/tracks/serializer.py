@@ -28,12 +28,17 @@ class PointSerializer(serializers.ModelSerializer):
     class Meta:
         model = Point
         fields = ['track', 'location', 'time', 'velocity', 'course', 'description', 'active', 'id']
-        # ordering = ['time'] #not sure if this is doing anything
-
+        # ordering = ['-id']
 
 
 class TrackSerializer(serializers.ModelSerializer):
     points = PointSerializer(many=True)
+
     class Meta:
         model = Track
         fields = ['id', 'user', 'name', 'description', 'active', 'point_count', 'points', 'start_date', 'end_date']
+
+    def get_points(selfset, obj):
+        queryset = Point.objects.filter(track__id=obj.pk).prefetch_related()
+        serializer = PointSerializer(queryset, many=True)
+        return serializer.data

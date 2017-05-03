@@ -2,6 +2,7 @@ var map;
 tracks = {};
 var iconBase = static_url + 'images/markers/';
 icons = {};
+colors = {};
 
 function init() {
     getTracks().done(function (res, status) {
@@ -19,7 +20,7 @@ function init() {
 
 
 function initMap(lat, lon) {
-    map = new google.maps.Map(document.getElementById('map'), {
+    mapObject = new google.maps.Map(document.getElementById('map'), {
         center: {lat: lat, lng: lon},
         zoom: 16,
         mapTypeId: 'terrain'
@@ -58,6 +59,13 @@ function initMap(lat, lon) {
             anchor: new google.maps.Point(3, 3)
         }
     };
+    colors = {
+        black: '#000000',
+        red: 'F90000',
+        green: '0CB300',
+        yellow: 'EFFC00',
+        blue: '0004FE'
+    }
 
 
 
@@ -89,9 +97,9 @@ function plotTrack(track) {
             icon: icons['red_marker'],
             map: map
         });
-        marker.setMap(map);
+        marker.setMap(mapObject);
     });
-    route.setMap(map);
+    route.setMap(mapObject);
 }
 
 

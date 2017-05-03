@@ -1,10 +1,6 @@
-import json
-
 from django.views.generic import TemplateView
 from django.views.generic.base import ContextMixin
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from config.settings.base import GOOGLE_API_KEY
 from gpstrack.tracks.models import Track, Point
@@ -21,13 +17,15 @@ class MapView(TemplateView, ContextMixin):
 
 
 class TrackListView(generics.ListCreateAPIView):
-    queryset = Track.objects.all()
+    queryset = Track.objects.all().prefetch_related()
     serializer_class = TrackSerializer
 
     def filter_queryset(self, queryset):
-        filters = {}
-        if self.kwargs.get('all'):
-            filters['active'] = True
+        filters = {
+            'active': True
+        }
+        if self.request.query_params.get('inactive', '') == 'true':
+            filters.pop('active')
         return queryset.filter(**filters)
 
 
@@ -35,6 +33,9 @@ class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
+    def filter_queryset(self, queryset):
+        filters = {}
+        return queryset.filter(**filters).order_by('-start_date')
 
 class TrackPointList(generics.ListCreateAPIView):
     queryset = Point.objects.all()
@@ -42,14 +43,19 @@ class TrackPointList(generics.ListCreateAPIView):
 
     def filter_queryset(self, queryset):
         filters = {}
-        if self.kwargs.get('track_pk'):
-            filters['track'] = self.kwargs['track_pk']
         return queryset.filter(**filters)
 
 
-class PointListView(generics.ListCreateAPIView):
+class PointList(generics.ListCreateAPIView):
     queryset = Point.objects.all()
     serializer_class = PointSerializer
+
+    def filter_queryset(self, queryset):
+        super().filter_queryset(queryset)
+        filters = {}
+        if self.kwargs.get('track_pk'):
+            filters['track'] = self.kwargs['track_pk']
+        return queryset.filter(**filters)
 
 
 class PointDetail(generics.RetrieveUpdateDestroyAPIView):
