@@ -6,6 +6,7 @@ class TrackManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('points', )
 
+
 class Track(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     name = models.CharField(max_length=256, blank=True, null=True)
@@ -13,17 +14,30 @@ class Track(models.Model):
     active = models.BooleanField(default=True)
     objects = TrackManager()
 
+    def __str__(self):
+        return '{}'.format(self.id)
+
     @property
     def start_date(self):
-        return self.points.first().time.UTC_time
+        if self.points.exists():
+            return self.points.first().time.UTC_time
+        return None
 
     @property
     def end_date(self):
-        return self.points.last().time.UTC_time
+        if self.points.exists():
+            return self.points.last().time.UTC_time
+        return None
 
     @property
     def point_count(self):
         return self.points.count()
+
+    @property
+    def duration(self):
+        if self.points.exists():
+            return self.end_date - self.start_date
+        return None
 
 
 class PointManager(models.Manager):
@@ -40,6 +54,9 @@ class Point(models.Model):
     description = models.TextField(max_length=1000, blank=True, null=True)
     active = models.BooleanField(default=True)
     objects = PointManager()
+
+    def __str__(self):
+        return '{}'.format(self.id)
 
     class Meta:
         ordering = ['time__UTC_time']
@@ -58,13 +75,22 @@ class Message(models.Model):
     active = models.BooleanField(default=True)
     objects = MessageManager()
 
+    def __str__(self):
+        return '{} | {}'.format(self.user, self.time)
+
 
 class Time(models.Model):
     UTC_time = models.DateTimeField(db_index=True)
     local_time = models.DateTimeField()
+
+    def __str__(self):
+        return '{} | {}'.format(self.UTC_time.date(), self.UTC_time.time())
 
 
 class Location(models.Model):
     lat = models.FloatField()
     lon = models.FloatField()
     elevation = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return '{}, {}'.format(self.lat, self.lon)
