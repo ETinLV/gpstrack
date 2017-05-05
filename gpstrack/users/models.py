@@ -19,10 +19,14 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+
     def get_absolute_url(self):
         return reverse('users:detail', kwargs={'username': self.username})
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField('User', related_name='profile')
-    display_name = models.CharField(blank=True, max_length=255)
+    display_name = models.CharField(max_length=255)
+
+
+    # Maybe override the save method and if no display name is given, default to a user name?

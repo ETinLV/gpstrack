@@ -140,7 +140,7 @@ function createContentString(point, track) {
 	'<div style="padding-bottom:5px;">'
 
 		<div>
-			<div data-bind="text: displayName" style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` + 'Eric Turner' + `</div>
+			<div data-bind="text: displayName" style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` + track.user.profile.display_name + `</div>
 		</div>
 		<div style="color:#999999;">
 			<span style="float:left;font-size:11px;" data-bind="text:  messageDate">Apr 30, 2017</span>

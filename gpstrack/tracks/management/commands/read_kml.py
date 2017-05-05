@@ -2,21 +2,19 @@ import re
 
 import pytz
 import xmltodict
+from django.conf import settings
+from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
 from gpstrack.tracks.models import Track, Point, Time, Location, Message
-
-from django.conf import settings
-from django.core.management.base import BaseCommand
-
 from gpstrack.users.models import User
 
 BASE_DIR = settings.BASE_DIR
 """This did not work so well, revist later"""
 
-class Command(BaseCommand):
 
+class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super().__init__(stdout, stderr, no_color)
 
@@ -28,86 +26,105 @@ class Command(BaseCommand):
         xml_file = settings.ROOT_DIR + 'tracks.kml'
         with open(xml_file.root, "rb") as f:
             d = xmltodict.parse(f, xml_attribs=True)
-        routes, points, messages = 0,0,0
+        objs_created = {
+            'tracks': 0,
+            'points': 0,
+            'messages': 0,
+            'times': 0,
+            'locations': 0
+        }
         for route in d['kml']['Document']['Folder']:
             user = User.objects.get(id=1)
-            track, created = Track.objects.update_or_create(
+            track, tr_created = Track.objects.update_or_create(
                 user=user,
-                name='{} {} - {}'.format(route['name'], convert_route_time(route['Placemark'][0]['TimeStamp']['when']).date(), convert_route_time(route['Placemark'][-2]['TimeStamp']['when']).date()),
-                description='My Track' )
-            if created:
-                routes += 1
+                name='{} {} - {}'.format(route['name'],
+                                         convert_route_time(route['Placemark'][0]['TimeStamp']['when']).date(),
+                                         convert_route_time(route['Placemark'][-2]['TimeStamp']['when']).date()),
+                description='My Track')
+            if tr_created:
+                objs_created['tracks'] += 1
             for point in route['Placemark']:
                 try:
                     data = point['ExtendedData']['Data']
                     if not data[15]['value']:
-                        point, created = Point.objects.update_or_create(
+                        time, t_created = Time.objects.update_or_create(
+                            UTC_time=convert_point_time(data[1]['value']),
+                            local_time=convert_point_time(data[2]['value']))
+                        location, l_created = Location.objects.update_or_create(
+                            lat=data[8]['value'],
+                            lon=data[9]['value'],
+                            elevation=convert_elevation(data[10]['value']))
+
+                        point, p_created = Point.objects.update_or_create(
                             track=track,
-                            time=Time.objects.update_or_create(
-                                UTC_time = timezone.make_aware(convert_point_time(data[1]['value']), timezone=pytz.UTC), # Convert These '4/15/2017 5:57:19 PM' '4/15/2017 10:57:19 PM'
-                                local_time = convert_point_time(data[2]['value']))[0],
-                            location=Location.objects.update_or_create(
-                                lat=data[8]['value'],
-                                lon = data[9]['value'],
-                                elevation = convert_elevation(data[10]['value']))[0], #'325 m from MSL'
-                            velocity = convert_velocity(data[11]['value']), #'2.5 km/h'
-                            course = convert_course(data[12]['value']),
-                            # These should likely be something else?
+                            time=time,
+                            location=location,
+                            velocity=convert_velocity(data[11]['value']),
+                            course=convert_course(data[12]['value']),
                         )
-                        if created:
-                            points += 1
+                        if t_created:
+                            objs_created['times'] += 1
+                        if l_created:
+                            objs_created['locations'] += 1
+                        if p_created:
+                            objs_created['points'] += 1
                     else:
-                        message, created = Message.objects.update_or_create(
+                        time, t_created = Time.objects.update_or_create(
+                            UTC_time=convert_point_time(data[1]['value']),
+                            local_time=convert_point_time(data[2]['value']))
+                        location, l_created = Location.objects.update_or_create(
+                            lat=data[8]['value'],
+                            lon=data[9]['value'],
+                            elevation=convert_elevation(data[10]['value']))
+
+                        message, m_created = Message.objects.update_or_create(
                             user=user,
-                            time=Time.objects.update_or_create(
-                                UTC_time=convert_point_time(data[1]['value']),
-                                # Convert These '4/15/2017 5:57:19 PM' '4/15/2017 10:57:19 PM'
-                                local_time=convert_point_time(data[2]['value']))[0],
-                            location=Location.objects.update_or_create(
-                                lat=data[8]['value'],
-                                lon=data[9]['value'])[0],
+                            time=time,
+                            location=location,
                             text=data[15]['value'],
-                            # These should likely be something else?
                         )
-                        if created:
-                            messages += 1
+                        if m_created:
+                            objs_created['messages'] += 1
+                        if t_created:
+                            objs_created['times'] += 1
+                        if l_created:
+                            objs_created['locations'] += 1
                 except KeyError:
                     pass
-        print('\033[92mCreated {} Routes, {} Points and {} Messages'.format(routes, points, messages))
+        print('\033[92mCreated\n{} Tracks\n{} Points\n{} Messages\n{} Times\n{} Locations'.format(
+            objs_created['tracks'],
+            objs_created['points'],
+            objs_created['messages'],
+            objs_created['times'],
+            objs_created['locations']))
+
 
 def convert_route_time(time):
-    return datetime.strptime(time,'%Y-%m-%dT%H:%M:%SZ',)
+    return timezone.make_aware(datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ'), timezone=pytz.UTC)
+
 
 def convert_point_time(time):
-    return datetime.strptime(time,'%m/%d/%Y %I:%M:%S %p')
+    """Point in Local time, this is not ISO format"""
+    return timezone.make_aware(datetime.strptime(time, '%m/%d/%Y %I:%M:%S %p') - timezone.timedelta(hours=2),
+                               timezone=pytz.UTC)
+
 
 def convert_elevation(elevation):
+    """convert elevation in meters to FT"""
     meters = re.match('[0-9.]*', elevation)[0]
     meters = float(meters)
-    return meters * 3.2808398950131
+    return round(meters * 3.280831, 4)
+
 
 def convert_velocity(velocity):
+    """convert Kilometers/h to Miles/h"""
     velocity = re.match('[0-9.]*', velocity)[0]
     velocity = float(velocity)
-    return velocity * 3280.8
+    return round(velocity * 0.621371, 4)
+
 
 def convert_course(course):
     if course:
         course = re.match('[0-9.]*', course)[0]
         return course
     return
-
-"""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    name = models.CharField(max_length=256, blank=True, null=True)
-    desc = models.TextField(max_length=1000, blank=True, null=True)
-"""
-""" 
-   Make these work with the thingy
-   lat = models.FloatField()
-    lon = models.FloatField()
-    datetime = models.DateTimeField()
-    elevation = models.FloatField(blank=True)
-    velocity = models.FloatField(blank=True)
-    course = models.CharField(max_length=5, blank=True, required=False)
-    track = models.OneToOneField(to=Track)"""
