@@ -42,7 +42,7 @@ class TrackPointList(generics.ListCreateAPIView):
     serializer_class = PointSerializer
 
     def filter_queryset(self, queryset):
-        filters = {}
+        filters = {'track__active': True}
         return queryset.filter(**filters)
 
 
