@@ -36,7 +36,6 @@ function plotTrack(track) {
     var track = track;
     var points = [];
     track['points'].forEach(function (point) {
-        console.log(track);
         var google_point = new google.maps.LatLng(point['location']['lat'], point['location']['lon']);
         points.unshift(
             google_point
@@ -69,9 +68,9 @@ function placeMarker(point) {
     });
 }
 
-function createInfoBox(point) {
+function createInfoBox(point, track) {
     return new google.maps.InfoWindow({
-        content: createContentString(point)
+        content: createContentString(point, track)
     });
 }
 
@@ -137,7 +136,7 @@ function getPointsForTrack(trackPK) {
 
 function createContentString(point, track) {
     return `<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 193px;"><div id="divPopup" class="container-fluid" style="margin:-10px; padding-right:2px; padding-left:2px; min-width:140px;">' +
-	'<div style="padding-bottom:5px;">'
+	'<div style="padding-bottom:5px; padding-left;10px">'
 
 		<div>
 			<div data-bind="text: displayName" style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` + track.user.profile.display_name + `</div>
