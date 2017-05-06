@@ -1,0 +1,64 @@
+<div class="leaflet-popup-content-wrapper">
+    <div class="leaflet-popup-content" style="width: 193px;">
+        <div id="divPopup" class="container-fluid"
+             style="margin:-10px; padding-right:2px; padding-left:2px; min-width:140px;">
+            <div style="padding-bottom:5px; padding-left:10px;">
+                <div>
+                    <div style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` +
+                        track.user.profile.display_name + `
+                    </div>
+                </div>
+                <div style="color:#999999;">
+                    <span style="float:left;font-size:11px;" data-bind="text:  messageDate">`+new Date(point.time.local_Time).toDateString()+`</span>
+                    <span style="float:right;font-size:11px;" data-bind="text: messageTime">`+new Date(point.time.local_Time).toTimeString()+`</span>
+                </div>
+                <div style="clear: both;"></div>
+                <br>
+                <div>
+                    <span style="font-size: 12px; overflow: hidden; text-overflow: ellipsis;word-wrap:break-word;">`+ 'a message, if a message'+`</span>
+                    <br>
+                </div>
+                <div style="display: none;">
+                    Track Id: <span>`+track.id+`</span><br>
+                    Track: <span>`+track.name+`</span>
+                </div>
+            </div>
+            <div class="row-fluid" style="padding-bottom: 10px;">
+                <table>
+                    <tbody>
+                    <tr style="white-space:nowrap">
+                        <td>
+						<span style="color:gray;font-size:11px;">Speed: <span
+                                style="white-space:nowrap;font-size:11px;color:black">`+point.velocity+` mph</span>
+					</span></td>
+                        <td style="padding-left:12px;">
+						<span style="color:gray;font-size:11px;">Course: <span
+                                style="white-space:nowrap;font-size:11px;color:black">`+point.course+`</span>
+					</span></td>
+                    </tr>
+                    <tr style="white-space:nowrap">
+                        <td>
+						<span style="color:gray;font-size:11px;">Elevation: <span
+                                style="white-space:nowrap;font-size:11px;color:black">`+point.location.elevation+` ft.</span>
+					</span></td>
+                        <td style="padding-left:12px;">
+						<span style="color: gray; font-size: 11px; display: none;" data-bind="visible: batt()!=''">Batt: <span
+                                style="white-space:nowrap;font-size:11px;color:black">batt??</span>
+					</span></td>
+                    </tr>
+                    <tr style="white-space:nowrap">
+                        <td>
+						<span style="color:gray;font-size:11px;">Lat: <span
+                                style="white-space:nowrap;font-size:11px;color:black">`+point.location.lat+`</span>
+					</span></td>
+                        <td style="padding-left:12px;">
+						<span style="color:gray;font-size:11px;">Lon: <span
+                                style="white-space:nowrap;font-size:11px;color:black">`+point.location.lon+`</span>
+					</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
