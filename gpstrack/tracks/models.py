@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from timezone_field import TimeZoneField
 
 
 class TrackManager(models.Manager):
@@ -48,7 +49,7 @@ class PointManager(models.Manager):
 class Point(models.Model):
     track = models.ForeignKey(to=Track, null=True, related_name='points')
     location = models.ForeignKey(to='Location', related_name='points')
-    time = models.ForeignKey(to='Time', db_index=True, related_name='points')
+    time = models.OneToOneField(to='Time', db_index=True, related_name='points')
     velocity = models.FloatField(blank=True)
     course = models.CharField(max_length=5, blank=True, null=True)
     description = models.TextField(max_length=1000, blank=True, null=True)
@@ -70,7 +71,7 @@ class MessageManager(models.Manager):
 class Message(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages')
     location = models.ForeignKey(to='Location', related_name='location')
-    time = models.ForeignKey(to='Time', related_name='time')
+    time = models.OneToOneField(to='Time', related_name='time')
     text = models.TextField(max_length=1000, blank=True, null=True)
     active = models.BooleanField(default=True)
     objects = MessageManager()
@@ -81,10 +82,11 @@ class Message(models.Model):
 
 class Time(models.Model):
     UTC_time = models.DateTimeField(db_index=True)
-    local_time = models.DateTimeField()
+    local_time = models.DateTimeField(null=True, blank=True)
+    local_time_zone = TimeZoneField()
 
     def __str__(self):
-        return '{} | {}'.format(self.UTC_time.date(), self.UTC_time.time())
+        return '{} | {}'.format(self.UTC_time.date(), self.local_time.time())
 
 
 class Location(models.Model):

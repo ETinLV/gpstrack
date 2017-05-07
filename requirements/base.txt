@@ -47,3 +47,15 @@ xmltodict==0.10.2
 
 #Django REST Framework
 djangorestframework == 3.6.2
+
+# Get Timezone from Location
+tzwhere == 2.3
+
+# TZwhere dependency (not working? need geos dependancy mabybe?)
+# shapely
+
+# Numpy
+numpy == 1.12.1
+
+# Timezone Field
+django-timezone-field == 2.0

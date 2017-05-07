@@ -29,7 +29,6 @@ class PointSerializer(serializers.ModelSerializer):
     class Meta:
         model = Point
         fields = ['track', 'location', 'time', 'velocity', 'course', 'description', 'active', 'id']
-        # ordering = ['-id']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

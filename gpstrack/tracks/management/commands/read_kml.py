@@ -6,12 +6,18 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
+from tzwhere import tzwhere
 
 from gpstrack.tracks.models import Track, Point, Time, Location, Message
 from gpstrack.users.models import User
 
 BASE_DIR = settings.BASE_DIR
-"""This did not work so well, revist later"""
+# this takes ~20 seconds to init, so init only once on run
+TZ = tzwhere.tzwhere()
+
+
+# On production use this instead: long INIT, but faster performance
+# TZ = tzwhere.tzwhere(shapely=True)
 
 
 class Command(BaseCommand):
@@ -48,8 +54,7 @@ class Command(BaseCommand):
                     data = point['ExtendedData']['Data']
                     if not data[15]['value']:
                         time, t_created = Time.objects.update_or_create(
-                            UTC_time=convert_point_time(data[1]['value']),
-                            local_time=convert_point_time(data[2]['value']))
+                            UTC_time=convert_point_time(data[1]['value']))
                         location, l_created = Location.objects.update_or_create(
                             lat=data[8]['value'],
                             lon=data[9]['value'],
@@ -62,6 +67,7 @@ class Command(BaseCommand):
                             velocity=convert_velocity(data[11]['value']),
                             course=convert_course(data[12]['value']),
                         )
+                        covert_utc_to_location(point)
                         if t_created:
                             objs_created['times'] += 1
                         if l_created:
@@ -70,8 +76,7 @@ class Command(BaseCommand):
                             objs_created['points'] += 1
                     else:
                         time, t_created = Time.objects.update_or_create(
-                            UTC_time=convert_point_time(data[1]['value']),
-                            local_time=convert_point_time(data[2]['value']))
+                            UTC_time=convert_point_time(data[1]['value']))
                         location, l_created = Location.objects.update_or_create(
                             lat=data[8]['value'],
                             lon=data[9]['value'],
@@ -83,6 +88,7 @@ class Command(BaseCommand):
                             location=location,
                             text=data[15]['value'],
                         )
+                        covert_utc_to_location(message)
                         if m_created:
                             objs_created['messages'] += 1
                         if t_created:
@@ -104,9 +110,17 @@ def convert_route_time(time):
 
 
 def convert_point_time(time):
-    """Point in Local time, this is not ISO format"""
-    return timezone.make_aware(datetime.strptime(time, '%m/%d/%Y %I:%M:%S %p') - timezone.timedelta(hours=2),
+    """Point in UTC, this is not ISO format"""
+    return timezone.make_aware(datetime.strptime(time, '%m/%d/%Y %I:%M:%S %p'),
                                timezone=pytz.UTC)
+
+
+def covert_utc_to_location(obj):
+    timezone_str = TZ.tzNameAt(float(obj.location.lat), float(obj.location.lon))
+    local_time_zone = pytz.timezone(timezone_str)
+    obj.time.local_time = timezone.make_naive(obj.time.UTC_time, local_time_zone)
+    obj.time.local_time_zone = local_time_zone
+    obj.time.save()
 
 
 def convert_elevation(elevation):
