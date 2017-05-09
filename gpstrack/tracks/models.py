@@ -40,6 +40,9 @@ class Track(models.Model):
             return self.end_date - self.start_date
         return None
 
+    def get_owner(self):
+        return self.user
+
 
 class PointManager(models.Manager):
     def get_queryset(self):
@@ -48,13 +51,16 @@ class PointManager(models.Manager):
 
 class Point(models.Model):
     track = models.ForeignKey(to=Track, null=True, related_name='points')
-    location = models.ForeignKey(to='Location', related_name='points')
-    time = models.OneToOneField(to='Time', db_index=True, related_name='points')
+    location = models.OneToOneField(to='Location', related_name='point')
+    time = models.OneToOneField(to='Time', db_index=True, related_name='point')
     velocity = models.FloatField(blank=True)
     course = models.CharField(max_length=5, blank=True, null=True)
     description = models.TextField(max_length=1000, blank=True, null=True)
     active = models.BooleanField(default=True)
     objects = PointManager()
+
+    def get_owner(self):
+        return self.track.user
 
     def __str__(self):
         return '{}'.format(self.id)
@@ -70,11 +76,14 @@ class MessageManager(models.Manager):
 
 class Message(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages')
-    location = models.ForeignKey(to='Location', related_name='location')
-    time = models.OneToOneField(to='Time', related_name='time')
+    location = models.OneToOneField(to='Location', related_name='message')
+    time = models.OneToOneField(to='Time', related_name='message')
     text = models.TextField(max_length=1000, blank=True, null=True)
     active = models.BooleanField(default=True)
     objects = MessageManager()
+
+    def get_owner(self):
+        return self.user
 
     def __str__(self):
         return '{} | {}'.format(self.user, self.time)
@@ -85,6 +94,12 @@ class Time(models.Model):
     local_time = models.DateTimeField(null=True, blank=True)
     local_time_zone = TimeZoneField()
 
+    def get_owner(self):
+        try:
+            return self.point.track.user
+        except AttributeError:
+            return self.message.user
+
     def __str__(self):
         return '{} | {}'.format(self.UTC_time.date(), self.local_time.time())
 
@@ -93,6 +108,12 @@ class Location(models.Model):
     lat = models.FloatField()
     lon = models.FloatField()
     elevation = models.FloatField(null=True, blank=True)
+
+    def get_owner(self):
+        try:
+            return self.point.track.user
+        except AttributeError:
+            return self.message.user
 
     def __str__(self):
         return '{}, {}'.format(self.lat, self.lon)

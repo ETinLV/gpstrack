@@ -144,7 +144,6 @@ function make_local_time(date) {
 
 
 function createContentString(point, track) {
-    console.log(moment(make_local_time(point.time.local_time)));
     return `<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 193px;"><div id="divPopup" class="container-fluid" style="margin:-10px; padding-right:2px; padding-left:2px; min-width:140px;">
 	<div style="padding-bottom:5px; padding-left:10px;">
 		<div>

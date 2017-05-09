@@ -100,10 +100,14 @@
 
 <!-- place project specific Javascript in this file -->
 <script type="text/javascript">
+
     var baseURL = "{% url 'tracks:home' %} ";
     var static_url = "{{ STATIC_URL }}";
-    var tracksListURL = "{% url 'tracks:api.track_list' %}";
-    var pointsListURL = "{% url 'tracks:api.point_list' %}";
+
+    {% if map_name %}
+        var tracksListURL = "{% url 'tracks:api.track_list' map_name=map_name %}";
+        var pointsListURL = "{% url 'tracks:api.point_list' map_name=map_name %}";
+    {% endif %}
 </script>
 <script src="{% static 'js/project.js' %}"></script>
 
