@@ -1,3 +1,4 @@
+
 var map;
 tracks = {};
 var iconBase = static_url + 'images/markers/';
@@ -134,15 +135,24 @@ function getPointsForTrack(trackPK) {
     })
 }
 
+function make_local_time(date) {
+    let local_date = new Date(date);
+    let userTimezoneOffset = local_date.getTimezoneOffset() * 60000;
+    return new Date(local_date.getTime() + userTimezoneOffset);
+}
+
+
+
 function createContentString(point, track) {
+    console.log(moment(make_local_time(point.time.local_time)));
     return `<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 193px;"><div id="divPopup" class="container-fluid" style="margin:-10px; padding-right:2px; padding-left:2px; min-width:140px;">
 	<div style="padding-bottom:5px; padding-left:10px;">
 		<div>
 			<div style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` + track.user.profile.display_name + `</div>
 		</div>
 		<div style="color:#999999;">
-			<span style="float:left;font-size:11px;" data-bind="text:  messageDate">` + new Date(point.time.local_Time).toDateString() + `</span>
-			<span style="float:right;font-size:11px;" data-bind="text: messageTime">` + new Date(point.time.local_Time).toTimeString() + `</span>
+			<span style="float:left;font-size:11px;" data-bind="text:  messageDate">Location Time: ` + moment(make_local_time(point.time.local_time)).format('MMMM Do YYYY, h:mm:ss a') + `</span>
+			<span style="float:right;font-size:11px;" data-bind="text: messageTime">Time: ` + moment(point.time.UTC_time).format('MMMM Do YYYY, h:mm:ss a') + `</span>
 		</div>
 		<div style="clear: both;"></div>
 		<br>
