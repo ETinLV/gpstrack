@@ -5,10 +5,6 @@ var iconBase = static_url + 'images/markers/';
 icons = {};
 colors = {};
 
-var iconBase = static_url + 'images/markers/';
-icons = {};
-colors = {};
-
 function init() {
     getTracks().done(function (res, status) {
         tracks = res;
@@ -28,7 +24,7 @@ function initMap(lat, lon) {
     mapObject = new google.maps.Map(document.getElementById('map'), {
         center: {lat: lat, lng: lon},
         zoom: 16,
-        mapTypeId: 'terrain'
+        mapTypeId: 'hybrid'
 
     });
     icons = createIcons();
@@ -158,13 +154,14 @@ function make_local_time(date) {
 
 
 function deactivatePoint(pointID, trackID) {
+    console.log('removing point ' + pointID + 'for track ' + trackID);
     pointUrl = pointsListURL + pointID + '/';
     return $.ajax({
         type: 'PATCH',
         url: pointUrl,
         data: '{"active":"False"}',
         success: function (data) {
-            deleteMarker(tracks[trackID].markers[pointID]);
+            // deleteMarker(tracks[trackID].markers[pointID]);
         },
         contentType: "application/json",
         dataType: 'json'
@@ -235,7 +232,7 @@ function createContentString(point, track) {
 		</table>
 	</div>
 	<div id="ownMap">
-	` + ownMapButtons(point, track) + `
+	 ` + ownMapButtons(point, track) + `
 	</div>
 </div></div></div>`;
 
