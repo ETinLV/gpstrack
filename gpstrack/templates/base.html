@@ -24,6 +24,7 @@
 </head>
 
 <body>
+
 <div class="m-b-1">
     <nav class="navbar navbar-dark navbar-static-top bg-inverse">
         <div class="container">
@@ -107,6 +108,12 @@
     {% if map_name %}
         var tracksListURL = "{% url 'tracks:api.track_list' map_name=map_name %}";
         var pointsListURL = "{% url 'tracks:api.point_list' map_name=map_name %}";
+        {% if request.user.username == map_name %}
+            var ownMap = true
+        {% else %}
+            var ownMap = false
+        {% endif %}
+
     {% endif %}
 </script>
 <script src="{% static 'js/project.js' %}"></script>
