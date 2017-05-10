@@ -23,7 +23,7 @@ urlpatterns = [
 
     # Points
     url(r'^api/(?P<map_name>[\w.@+-]+)/points/$', views.TrackPointList.as_view(), name='api.point_list'),
-    # url(r'^api/(?P<map_name>[\w.@+-]+)/points/$', views.PointList.as_view(), name='api.point_list'),
-    # url(r'^api/points/(?P<pk>[0-9]+)/$', views.PointDetail.as_view(), name='api.point_detail'),
+    url(r'^api/(?P<map_name>[\w.@+-]+)/points/$', views.PointList.as_view(), name='api.point_list'),
+    url(r'^api/(?P<map_name>[\w.@+-]+)/points/(?P<pk>[0-9]+)/$', views.PointDetail.as_view(), name='api.point_detail'),
 
 ]

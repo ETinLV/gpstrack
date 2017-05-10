@@ -1,6 +1,10 @@
-
 var map;
-tracks = {};
+var map;
+var tracks = {};
+var iconBase = static_url + 'images/markers/';
+icons = {};
+colors = {};
+
 var iconBase = static_url + 'images/markers/';
 icons = {};
 colors = {};
@@ -29,41 +33,51 @@ function initMap(lat, lon) {
     });
     icons = createIcons();
     colors = createColors();
-
 }
 
 
 function plotTrack(track) {
-    var track = track;
+    track['markers'] = {};
     var points = [];
     track['points'].forEach(function (point) {
-        var google_point = new google.maps.LatLng(point['location']['lat'], point['location']['lon']);
+        var googlePoint = new google.maps.LatLng(point['location']['lat'], point['location']['lon']);
         points.unshift(
-            google_point
+            googlePoint
         )
-        var marker = placeMarker(google_point);
+        var marker = placeMarker(googlePoint, point);
+        track.markers[marker.id] = marker;
         var infoBox = createInfoBox(point, track);
         google.maps.event.addListener(marker, 'click', function () {
                 infoBox.open(mapObject, marker);
                 marker.setMap(mapObject);
-
             }
         );
+
+        google.maps.event.addListener(mapObject, "click", function (event) {
+            infoBox.close();
+        });
         marker.setMap(mapObject);
     });
     var route = new google.maps.Polyline({
         path: points,
         geodesic: true,
         strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
+        strokeOpacity: .5,
         strokeWeight: 2
     });
     route.setMap(mapObject);
+    tracks[track.id] = track;
 }
 
-function placeMarker(point) {
+function deleteMarker(marker) {
+    console.log(marker);
+    marker.setMap(null)
+}
+
+function placeMarker(googlePoint, point) {
     return new google.maps.Marker({
-        position: point,
+        id: point.id,
+        position: googlePoint,
         icon: icons['red_marker'],
         map: map
     });
@@ -81,6 +95,7 @@ function getTracks() {
         url: tracksListURL
     })
 }
+
 
 function createIcons() {
     return {
@@ -142,21 +157,46 @@ function make_local_time(date) {
 }
 
 
+function deactivatePoint(pointID, trackID) {
+    pointUrl = pointsListURL + pointID + '/';
+    return $.ajax({
+        type: 'PATCH',
+        url: pointUrl,
+        data: '{"active":"False"}',
+        success: function (data) {
+            deleteMarker(tracks[trackID].markers[pointID]);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+function ownMapButtons(point, track) {
+    if (ownMap) {
+        return `<button id="deactivate" onclick="deactivatePoint(` + point.id + ',' + track.id + `)">Deactivate</button>`
+
+    } else {
+        return ''
+    }
+
+}
+
 
 function createContentString(point, track) {
-    return `<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 193px;"><div id="divPopup" class="container-fluid" style="margin:-10px; padding-right:2px; padding-left:2px; min-width:140px;">
+    content = `<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: auto; height: auto"><div id="divPopup" class="container-fluid" style="margin:10px; padding-right:2px; padding-left:2px; min-width:140px;">
 	<div style="padding-bottom:5px; padding-left:10px;">
 		<div>
-			<div style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap">` + track.user.profile.display_name + `</div>
+			<div style="font-size:14px;overflow:hidden;text-overflow:ellipsis; white-space:nowrap; text-align: center">` + track.user.profile.display_name + `</div>
 		</div>
 		<div style="color:#999999;">
-			<span style="float:left;font-size:11px;" data-bind="text:  messageDate">Location Time: ` + moment(make_local_time(point.time.local_time)).format('MMMM Do YYYY, h:mm:ss a') + `</span>
-			<span style="float:right;font-size:11px;" data-bind="text: messageTime">Time: ` + moment(point.time.UTC_time).format('MMMM Do YYYY, h:mm:ss a') + `</span>
+			<span style="float:left;font-size:11px;" data-bind="text:  messageDate">Location Time: ` + moment(make_local_time(point.time.local_time)).format('h:mm:ss a [on] MMMM Do YYYY') + `</span>
+			<br>
+			<span style="float:right;font-size:11px;" data-bind="text: messageTime">Viewer Time: ` + moment(point.time.UTC_time).format('h:mm:ss a [on] MMMM Do YYYY') + `</span>
 		</div>
 		<div style="clear: both;"></div>
 		<br>
 		<div>
-			<span style="font-size: 12px; overflow: hidden; text-overflow: ellipsis;word-wrap:break-word;">` + 'a message, if a message' + `</span>
+			<!--<span style="font-size: 12px; overflow: hidden; text-overflow: ellipsis;word-wrap:break-word;">` + 'a message, if a message' + `</span>-->
 			<br>
 		</div>
 		<div style="display: none;">
@@ -194,7 +234,11 @@ function createContentString(point, track) {
 			</tbody>
 		</table>
 	</div>
-</div></div></div>`
+	<div id="ownMap">
+	` + ownMapButtons(point, track) + `
+	</div>
+</div></div></div>`;
 
+
+    return content
 }
-

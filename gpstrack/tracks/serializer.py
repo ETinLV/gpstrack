@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from gpstrack.tracks.models import Track, Point, Location, Time, Message
 from gpstrack.users.models import User, UserProfile
@@ -48,7 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TrackSerializer(serializers.ModelSerializer):
-    points = PointSerializer(many=True)
+    points = SerializerMethodField()
     user = UserSerializer()
 
     class Meta:
@@ -57,5 +58,6 @@ class TrackSerializer(serializers.ModelSerializer):
 
     def get_points(selfset, obj):
         queryset = Point.objects.filter(track__id=obj.pk)
+        queryset = queryset.filter(active=True)
         serializer = PointSerializer(queryset, many=True)
         return serializer.data

@@ -8,14 +8,32 @@ app_models = []
 admin.site.register(app_models)
 
 
+# Actions
+def make_active(modeladmin, request, queryset):
+    queryset.update(active=True)
+
+
+make_active.short_description = "Mark selected objects as active"
+
+
+def make_inactive(modeladmin, request, queryset):
+    queryset.update(active=False)
+
+
+make_inactive.short_description = "Mark selected objects as inactive"
+
+
+
 @admin.register(models.Track)
 class TrackAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'name', 'description', 'start_date', 'end_date', 'point_count', 'duration', 'active')
+    actions = [make_active, make_inactive]
 
 
 @admin.register(models.Point)
 class PointAdmin(admin.ModelAdmin):
     list_display = ('id', 'track', 'time', 'active',)
+    actions = [make_active, make_inactive]
 
 
 @admin.register(models.Message)

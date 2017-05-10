@@ -51,9 +51,12 @@ class TrackPointList(generics.ListCreateAPIView):
 
     def filter_queryset(self, queryset):
         filters = {
+            'active': True,
             'track__active': True,
             'track__user__username': self.kwargs['map_name'],
         }
+        if self.request.query_params.get('inactive', '') == 'true':
+            filters.pop('active')
         return queryset.filter(**filters)
 
 
