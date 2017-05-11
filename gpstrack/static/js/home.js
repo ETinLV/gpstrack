@@ -7,15 +7,18 @@ colors = {};
 
 function init() {
     getTracks().done(function (res, status) {
-        tracks = res;
-        firstTrack = tracks[0]['points'];
+        res.forEach(function (t) {
+            tracks[t.id] = t
+        });
+        firstTrack = tracks[Object.keys(tracks)[0]]['points'];
         initMap(
             firstTrack[firstTrack.length - 1]['location']['lat'],
             firstTrack[firstTrack.length - 1]['location']['lon'])
     }).done(function () {
-        for (var i = 1; i < tracks.length; i++) {
-            plotTrack(tracks[i])
-        }
+        console.log(Object.keys(tracks));
+        Object.keys(tracks).forEach(function (key) {
+            plotTrack(tracks[key])
+        })
     })
 }
 
