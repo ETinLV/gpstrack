@@ -18,16 +18,17 @@ class Track(models.Model):
     def __str__(self):
         return '{}'.format(self.id)
 
+
     @property
     def start_date(self):
         if self.points.exists():
-            return self.points.first().time.UTC_time
+            return self.points.earliest('time__UTC_time').time.UTC_time
         return None
 
     @property
     def end_date(self):
         if self.points.exists():
-            return self.points.last().time.UTC_time
+            return self.points.latest('time__UTC_time').time.UTC_time
         return None
 
     @property
@@ -53,7 +54,7 @@ class Point(models.Model):
     track = models.ForeignKey(to=Track, null=True, related_name='points')
     location = models.OneToOneField(to='Location', related_name='point')
     time = models.OneToOneField(to='Time', db_index=True, related_name='point')
-    velocity = models.FloatField(blank=True)
+    velocity = models.FloatField(null=True, blank=True)
     course = models.CharField(max_length=5, blank=True, null=True)
     description = models.TextField(max_length=1000, blank=True, null=True)
     active = models.BooleanField(default=True)

@@ -27,7 +27,6 @@ __pycache__
 logs
 *.log
 pip-log.txt
-npm-debug.log*
 
 # Unit test / coverage reports
 .coverage
