@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
 from django.views.generic.base import ContextMixin
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from config.settings.base import GOOGLE_API_KEY
 from gpstrack.tracks import permissions
@@ -32,6 +33,10 @@ class TrackListView(generics.ListCreateAPIView):
             filters.pop('active')
         return queryset.filter(**filters)
 
+    def post(self, request, *args, **kwargs):
+        """This will need to check the user is logged in, and also that they are only editing their own track"""
+        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
 
 class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Track.objects.all()
@@ -44,7 +49,12 @@ class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
         }
         return queryset.filter(**filters).order_by('-start_date')
 
-class TrackPointList(generics.ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        """This will need to check the user is logged in, and also that they are only editing their own track"""
+        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+class PointList(generics.ListCreateAPIView):
     queryset = Point.objects.all()
     serializer_class = PointSerializer
     permission_classes = (permissions.IsOwnerOrReadOnly,)
@@ -59,20 +69,6 @@ class TrackPointList(generics.ListCreateAPIView):
             filters.pop('active')
         return queryset.filter(**filters)
 
-
-class PointList(generics.ListCreateAPIView):
-    queryset = Point.objects.all()
-    serializer_class = PointSerializer
-    permission_classes = (permissions.IsOwnerOrReadOnly,)
-
-    def filter_queryset(self, queryset):
-        super().filter_queryset(queryset)
-        filters = {
-            'track__user__username': self.kwargs['map_name'],
-        }
-        if self.kwargs.get('track_pk'):
-            filters['track'] = self.kwargs['track_pk']
-        return queryset.filter(**filters)
 
 
 class PointDetail(generics.RetrieveUpdateDestroyAPIView):

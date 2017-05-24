@@ -1,5 +1,5 @@
 [run]
 include = gpstrack/*
-omit = *migrations*, *tests*, /.direnv, /.cache
+omit = *migrations*, *tests*, *direnv*
 plugins =
     django_coverage_plugin

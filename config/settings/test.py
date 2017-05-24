@@ -7,7 +7,6 @@ Test settings
 
 from .base import *  # noqa
 
-
 # DEBUG
 # ------------------------------------------------------------------------------
 # Turn debug off so tests run faster
@@ -43,7 +42,6 @@ CACHES = {
 # ------------------------------------------------------------------------------
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-
 # PASSWORD HASHING
 # ------------------------------------------------------------------------------
 # Use fast password hasher so tests run faster
@@ -60,3 +58,7 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
         'django.template.loaders.app_directories.Loader',
     ], ],
 ]
+
+REST_FRAMEWORK = {
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+}

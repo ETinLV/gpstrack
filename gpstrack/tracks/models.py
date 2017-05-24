@@ -51,7 +51,7 @@ class PointManager(models.Manager):
 
 
 class Point(models.Model):
-    track = models.ForeignKey(to=Track, null=True, related_name='points')
+    track = models.ForeignKey(to=Track, related_name='points')
     location = models.OneToOneField(to='Location', related_name='point')
     time = models.OneToOneField(to='Time', db_index=True, related_name='point')
     velocity = models.FloatField(null=True, blank=True)
@@ -92,7 +92,7 @@ class Message(models.Model):
 
 class Time(models.Model):
     UTC_time = models.DateTimeField(db_index=True)
-    local_time = models.DateTimeField(null=True, blank=True)
+    local_time = models.DateTimeField()
     local_time_zone = TimeZoneField()
 
     def get_owner(self):
